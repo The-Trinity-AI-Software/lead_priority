@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Payday Loan Model Dashboard</title>
+  <style>
+    body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
+    .container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
+    h2, h3 { color: #333; text-align: center; }
+    label { display: block; margin-top: 15px; font-weight: bold; }
+    input[type="text"], input[type="password"], textarea, input[type="file"] {
+      width: 100%; padding: 10px; margin-top: 5px; border-radius: 4px; border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 20px; padding: 10px 20px; background: #007BFF; color: white; border: none;
+      border-radius: 4px; cursor: pointer;
+    }
+    button:hover { background: #0056b3; }
+    .status { margin-top: 20px; font-weight: bold; }
+    .success { color: green; }
+    .error { color: red; }
+    .chart-section { margin-top: 40px; text-align: center; }
+    .chart { margin-bottom: 20px; }
+    img {
+      max-width: 100%; height: auto; border-radius: 6px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h2>PayLoad Loan Lead</h2>
+
+    <!-- Model Training Section -->
+    <h3>Connect to Data Storage (AWS S3)</h3>
+    <label for="accessKey">AWS Access Key</label>
+    <input type="text" id="accessKey" placeholder="Enter AWS Access Key">
+    <label for="secretKey">AWS Secret Key</label>
+    <input type="password" id="secretKey" placeholder="Enter AWS Secret Key">
+    <label for="s3Uri">S3 URI</label>
+    <input type="text" id="s3Uri" placeholder="s3://your-bucket/payday_loan_leads.csv">
+    <button onclick="submitS3Details()">Connect and Train</button>
+    <div id="status" class="status"></div>
+
+    <hr>
+
+    <!-- Trail Prediction Upload -->
+    <h3>Upload Trail Data to Score and Bucket</h3>
+    <label for="trailFile">Upload Trail CSV File:</label>
+    <input type="file" id="trailFile" accept=".csv">
+    <button onclick="predictTrail()">Upload & Predict</button>
+    <div id="trailStatus" class="status"></div>
+
+    <!-- Charts -->
+    <div class="chart-section" id="plotSection" style="display: none;">
+      <h3>Model Evaluation Results</h3>
+      <div class="chart"><h4>ROC Curve</h4><img id="rocImg" alt="ROC Curve" /></div>
+      <div class="chart"><h4>Lift Curve</h4><img id="liftImg" alt="Lift Curve" /></div>
+      <div class="chart"><h4>Feature Importance</h4><img id="featureImg" alt="Feature Importance" /></div>
+      <div class="chart"><h4>Bucket Distribution</h4><img id="bucketImg" alt="Bucket Distribution" /></div>
+    </div>
+  </div>
+
+  <script>
+    async function submitS3Details() {
+      const accessKey = document.getElementById('accessKey').value;
+      const secretKey = document.getElementById('secretKey').value;
+      const s3Uri = document.getElementById('s3Uri').value;
+      const statusDiv = document.getElementById('status');
+      const plotSection = document.getElementById('plotSection');
+      statusDiv.textContent = '⏳ Connecting to S3 and training model...';
+      statusDiv.className = 'status';
+      plotSection.style.display = 'none';
+
+      try {
+        const response = await fetch('/retrain', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ access_key: accessKey, secret_key: secretKey, s3_uri: s3Uri })
+        });
+
+        const result = await response.json();
+        if (response.ok && result.plots) {
+          statusDiv.textContent = `✅ Model trained. AUC = ${result.AUC}`;
+          statusDiv.innerHTML += `<br>Accuracy: ${result.accuracy}
+                                  <br>Precision: ${result.precision}
+                                  <br>Recall: ${result.recall}
+                                  <br>F1 Score: ${result.f1_score}`;
+          statusDiv.classList.add('success');
+
+          document.getElementById("rocImg").src = result.plots.roc_curve;
+          document.getElementById("liftImg").src = result.plots.lift_curve;
+          document.getElementById("featureImg").src = result.plots.feature_importance;
+          document.getElementById("bucketImg").src = result.plots.bucket_distribution;
+          plotSection.style.display = 'block';
+        } else {
+          statusDiv.textContent = `❌ Error: ${result.message || result.error || 'Unknown error occurred.'}`;
+          statusDiv.classList.add('error');
+        }
+      } catch (error) {
+        statusDiv.textContent = `❌ Exception: ${error.message}`;
+        statusDiv.classList.add('error');
+      }
+    }
+
+    async function predictTrail() {
+      const trailFile = document.getElementById('trailFile').files[0];
+      const trailStatus = document.getElementById('trailStatus');
+      if (!trailFile) {
+        trailStatus.textContent = "❌ Please upload a CSV file.";
+        trailStatus.className = 'status error';
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('trail_file', trailFile);
+
+      trailStatus.textContent = "⏳ Scoring trail data...";
+      trailStatus.className = "status";
+
+      try {
+        const response = await fetch('/predict_trail', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await response.json();
+        if (result.status === "success") {
+          trailStatus.innerHTML = `✅ Prediction complete.<br><a href="${result.csv_path}" download>Download CSV</a> | <a href="${result.json_path}" download>Download JSON</a>`;
+          trailStatus.classList.add('success');
+        } else {
+          trailStatus.textContent = `❌ Error: ${result.message}`;
+          trailStatus.classList.add('error');
+        }
+      } catch (error) {
+        trailStatus.textContent = `❌ Exception: ${error.message}`;
+        trailStatus.classList.add('error');
+      }
+    }
+  </script>
+</body>
+</html>
