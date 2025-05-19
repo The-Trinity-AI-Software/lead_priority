@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Payday Loan Model Dashboard</title>
+  <title>Lead Optimization</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 20px; background-color: #f4f4f4; }
     .container { background: white; padding: 20px; border-radius: 8px; max-width: 800px; margin: auto; box-shadow: 0 0 10px rgba(0,0,0,0.1); }
@@ -29,7 +29,7 @@
 </head>
 <body>
   <div class="container">
-    <h2>PayLoad Loan Lead</h2>
+    <h2>Lead Optimization</h2>
 
     <!-- Model Training Section -->
     <h3>Connect to Data Storage (AWS S3)</h3>
@@ -45,8 +45,8 @@
     <hr>
 
     <!-- Trail Prediction Upload -->
-    <h3>Upload Trail Data to Score and Bucket</h3>
-    <label for="trailFile">Upload Trail CSV File:</label>
+    <h3>Upload Data for Lead Prioritization</h3>
+    <label for="trailFile">Upload Leads CSV File:</label>
     <input type="file" id="trailFile" accept=".csv">
     <button onclick="predictTrail()">Upload & Predict</button>
     <div id="trailStatus" class="status"></div>
@@ -115,7 +115,7 @@
       const formData = new FormData();
       formData.append('trail_file', trailFile);
 
-      trailStatus.textContent = "⏳ Scoring trail data...";
+      trailStatus.textContent = "⏳ Prioritizing Lead Data...";
       trailStatus.className = "status";
 
       try {
@@ -125,7 +125,7 @@
         });
         const result = await response.json();
         if (result.status === "success") {
-          trailStatus.innerHTML = `✅ Prediction complete.<br><a href="${result.csv_path}" download>Download CSV</a> | <a href="${result.json_path}" download>Download JSON</a>`;
+          trailStatus.innerHTML = `✅ Prioritization Complete.<br><a href="${result.csv_path}" download>Download CSV</a> | <a href="${result.json_path}" download>Download JSON</a>`;
           trailStatus.classList.add('success');
         } else {
           trailStatus.textContent = `❌ Error: ${result.message}`;
