@@ -4,9 +4,10 @@ import os
 import pandas as pd
 from model.model_train import train_model_from_s3
 from model.predictor import score_and_bucket  # ✅ ADD THIS LINE
+from flask_cors import CORS
 
 app = Flask(__name__)
-
+cors = CORS(app)
 
 app.config["UPLOAD_FOLDER"] = "uploads"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
