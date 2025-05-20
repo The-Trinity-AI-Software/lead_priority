@@ -11,7 +11,7 @@ import matplotlib.pyplot as plt
 import base64
 from io import BytesIO
 
-MODEL_DIR = "home/loan_priority/model"
+MODEL_DIR = "home/lead_priority/model"
 DOWNLOADS_DIR = "downloads"
 
 os.makedirs(MODEL_DIR, exist_ok=True)
