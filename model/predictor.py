@@ -3,8 +3,8 @@ import joblib
 from config import MODEL_PATH
 import os
 
-ENCODER_PATH = "home/lead_priority/model/encoders.pkl"
-COLUMNS_PATH = "home/lead_priority/model/x_columns.pkl"
+ENCODER_PATH = "/home/lead_priority/model/encoders.pkl"
+COLUMNS_PATH = "/home/lead_priority/model/x_columns.pkl"
 
 def load_model_and_metadata():
     model = joblib.load(MODEL_PATH)
