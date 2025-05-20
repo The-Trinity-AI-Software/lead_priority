@@ -90,4 +90,4 @@ def predict_trail():
 def download_file(filename):
     return send_from_directory("downloads", filename, as_attachment=False)
 if __name__ == "__main__":
-    app.run(debug=True, port=7000)
+    app.run(host='0.0.0.0', debug=True, port=7000)
