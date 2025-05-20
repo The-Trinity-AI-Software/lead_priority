@@ -10,7 +10,7 @@ app = Flask(__name__)
 
 app.config["UPLOAD_FOLDER"] = "uploads"
 os.makedirs(app.config["UPLOAD_FOLDER"], exist_ok=True)
-MODEL_DIR = "home/loan_priority/model"
+MODEL_DIR = "home/lead_priority/model"
 MODEL_PATH = os.path.join(MODEL_DIR, "xgb_model.pkl")
 ENCODER_PATH = os.path.join(MODEL_DIR, "encoders.pkl")
 COLUMNS_PATH = os.path.join(MODEL_DIR, "x_columns.pkl")
